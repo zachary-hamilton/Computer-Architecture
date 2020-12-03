@@ -73,4 +73,22 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        running = True
+        program_counter = 0
+        #register = [0] * 8
+        while running:
+            command_to_execute = self.ram[program_counter]
+
+            if command_to_execute == self.op_codes['HLT']:
+                running = False
+                program_counter += 1
+            elif command_to_execute == self.op_codes['LDI']:
+                value_to_save = self.ram[program_counter + 2]
+                register_to_save_it_in = self.ram[program_counter + 1]
+                self.register[register_to_save_it_in] = value_to_save
+                program_counter += 3
+            elif command_to_execute == self.op_codes['PRN']:
+                register_to_print = self.register[program_counter + 1]
+                print(f'{self.register[register_to_print]}')
+                program_counter += 2
+            
