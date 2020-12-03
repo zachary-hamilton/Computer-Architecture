@@ -6,8 +6,19 @@ class CPU:
     """Main CPU class."""
 
     def __init__(self):
-        """Construct a new CPU."""
-        pass
+        self.ram = [0] * 8
+        self.register = [0] * 8
+        self.op_codes = {'LDI': 0b10000010,
+                            'PRN': 0b01000111,
+                            'HLT': 0b00000001}
+
+    def ram_read(self, address):
+        '''Prints the given ram address'''
+        print(self.ram[address])
+
+    def ram_write(self, address, value):
+        '''Writes a value to a specified ram address'''
+        self.ram[address] = value
 
     def load(self):
         """Load a program into memory."""
