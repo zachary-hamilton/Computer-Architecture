@@ -4,9 +4,11 @@
 
 import sys
 from cpu import *
+import os
 
 cpu = CPU()
 
-#file_to_load = sys.argv[1]
-cpu.load()
+file_name = sys.argv[1]
+FILEPATH = os.path.join(os.path.dirname(__file__), 'examples', file_name)
+cpu.load(FILEPATH)
 cpu.run()

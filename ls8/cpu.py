@@ -21,27 +21,24 @@ class CPU:
         self.fl = 0
         self.halt = False
 
-    def load(self):
+    def load(self, file_to_load):
         """Load a program into memory."""
 
         address = 0
-
-        # For now, we've just hardcoded a program:
-
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
-
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
-
+        try:
+            with open(file_to_load) as my_file:
+                for line in my_file:
+                    comment_split = line.split('#')
+                    maybe_binary_number = comment_split[0]
+                    try:
+                        x = int(maybe_binary_number, 2)
+                        self.ram_write(x, address)
+                        address += 1
+                    except:
+                        continue
+                    
+        except FileNotFoundError:
+            print('file not found...')
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -82,6 +79,10 @@ class CPU:
             self.pc += program_counter_increment
         elif command_to_execute == LDI:
             self.registers[operand_a] = operand_b
+            self.pc += program_counter_increment
+        elif command_to_execute == MUL:
+            multiplication_result = self.registers[operand_a] * self.registers[operand_b]
+            self.registers[operand_a] = multiplication_result
             self.pc += program_counter_increment
 
     def run(self):
