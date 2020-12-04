@@ -2,23 +2,24 @@
 
 import sys
 
+# op codes
+HLT = 0b00000001
+PRN = 0b01000111
+LDI = 0b10000010
+MUL = 0b10100010
+
+
 class CPU:
     """Main CPU class."""
 
     def __init__(self):
-        self.ram = [0] * 8
-        self.register = [0] * 8
-        self.op_codes = {'LDI': 0b10000010,
-                            'PRN': 0b01000111,
-                            'HLT': 0b00000001}
-
-    def ram_read(self, address):
-        '''Prints the given ram address'''
-        print(self.ram[address])
-
-    def ram_write(self, address, value):
-        '''Writes a value to a specified ram address'''
-        self.ram[address] = value
+        """Construct a new CPU."""
+        self.ram = [0] * 256
+        self.registers = [0] * 8
+        self.registers[7] = 0xF4
+        self.pc = 0
+        self.fl = 0
+        self.halt = False
 
     def load(self):
         """Load a program into memory."""
@@ -71,24 +72,33 @@ class CPU:
 
         print()
 
+    def execute_command(self, command_to_execute, operand_a, operand_b):
+        program_counter_increment = ((command_to_execute >> 6) & 0b11) + 1
+        if command_to_execute == HLT:
+            self.halt = True
+            self.pc += program_counter_increment
+        elif command_to_execute == PRN:
+            print(self.registers[operand_a])
+            self.pc += program_counter_increment
+        elif command_to_execute == LDI:
+            self.registers[operand_a] = operand_b
+            self.pc += program_counter_increment
+
     def run(self):
         """Run the CPU."""
-        running = True
-        program_counter = 0
-        #register = [0] * 8
-        while running:
-            command_to_execute = self.ram[program_counter]
+        while not self.halt:
+            command_to_execute = self.ram[self.pc]
+            operand_a = self.ram[self.pc + 1]
+            operand_b = self.ram[self.pc + 2]
+            self.execute_command(command_to_execute, operand_a, operand_b)
 
-            if command_to_execute == self.op_codes['HLT']:
-                running = False
-                program_counter += 1
-            elif command_to_execute == self.op_codes['LDI']:
-                value_to_save = self.ram[program_counter + 2]
-                register_to_save_it_in = self.ram[program_counter + 1]
-                self.register[register_to_save_it_in] = value_to_save
-                program_counter += 3
-            elif command_to_execute == self.op_codes['PRN']:
-                register_to_print = self.register[program_counter + 1]
-                print(f'{self.register[register_to_print]}')
-                program_counter += 2
+    def ram_read(self, address):
+        return self.ram[address]
+
+    def ram_write(self, value, address):
+        self.ram[address] = value
+    
+
+
             
+
