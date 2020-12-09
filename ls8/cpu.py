@@ -7,6 +7,8 @@ HLT = 0b00000001
 PRN = 0b01000111
 LDI = 0b10000010
 MUL = 0b10100010
+POP = 0b01000110
+PUSH = 0b01000101
 
 
 class CPU:
@@ -16,7 +18,7 @@ class CPU:
         """Construct a new CPU."""
         self.ram = [0] * 256
         self.registers = [0] * 8
-        self.registers[7] = 0xF4
+        self.registers[7] = 0xF4 # stack pointer
         self.pc = 0
         self.fl = 0
         self.halt = False
@@ -81,10 +83,16 @@ class CPU:
             self.registers[operand_a] = operand_b
             self.pc += program_counter_increment
         elif command_to_execute == MUL:
-            multiplication_result = self.registers[operand_a] * self.registers[operand_b]
-            self.registers[operand_a] = multiplication_result
+            self.registers[operand_a] *= self.registers[operand_b]
             self.pc += program_counter_increment
-
+        elif command_to_execute == POP:
+            self.registers[operand_a] = self.ram[self.registers[7] + 1]
+            self.registers[7] += 1
+            self.pc += program_counter_increment
+        elif command_to_execute == PUSH:
+            self.ram[self.registers[7]] = self.registers[operand_a]
+            self.registers[7] -= 1
+            self.pc += program_counter_increment
     def run(self):
         """Run the CPU."""
         while not self.halt:
