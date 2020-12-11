@@ -9,6 +9,9 @@ LDI = 0b10000010
 MUL = 0b10100010
 POP = 0b01000110
 PUSH = 0b01000101
+CALL = 0b01010000
+RET = 0b00010001
+ADD = 0b10100000
 
 
 class CPU:
@@ -86,13 +89,29 @@ class CPU:
             self.registers[operand_a] *= self.registers[operand_b]
             self.pc += program_counter_increment
         elif command_to_execute == POP:
-            self.registers[operand_a] = self.ram[self.registers[7] + 1]
+            address = self.registers[7]
+            self.registers[operand_a] = self.ram_read(address)
             self.registers[7] += 1
             self.pc += program_counter_increment
         elif command_to_execute == PUSH:
-            self.ram[self.registers[7]] = self.registers[operand_a]
             self.registers[7] -= 1
+            value = self.registers[operand_a]
+            address = self.registers[7]
+            self.ram_write(value, address)
             self.pc += program_counter_increment
+        elif command_to_execute == CALL:
+            self.registers[7] -= 1
+            value = self.pc + 2
+            address = self.registers[7]
+            self.ram_write(value, address)
+            self.pc = self.registers[operand_a]
+        elif command_to_execute == RET:
+            self.pc = self.ram[self.registers[7]]
+            self.registers[7] += 1
+        elif command_to_execute == ADD:
+            self.registers[operand_a] += self.registers[operand_b]
+            self.pc += program_counter_increment
+
     def run(self):
         """Run the CPU."""
         while not self.halt:
