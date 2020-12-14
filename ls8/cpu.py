@@ -12,6 +12,10 @@ PUSH = 0b01000101
 CALL = 0b01010000
 RET = 0b00010001
 ADD = 0b10100000
+CMP = 0b10100111
+JMP = 0b01010100
+JEQ = 0b01010101
+JNE = 0b01010110
 
 
 class CPU:
@@ -23,7 +27,7 @@ class CPU:
         self.registers = [0] * 8
         self.registers[7] = 0xF4 # stack pointer
         self.pc = 0
-        self.fl = 0
+        self.fl = 0b00000000
         self.halt = False
 
     def load(self, file_to_load):
@@ -111,7 +115,29 @@ class CPU:
         elif command_to_execute == ADD:
             self.registers[operand_a] += self.registers[operand_b]
             self.pc += program_counter_increment
-
+        elif command_to_execute == CMP:
+            if self.registers[operand_a] == self.registers[operand_b]:
+                self.fl = self.fl | 0b00000001
+            elif self.registers[operand_a] < self.registers[operand_b]:
+                self.fl = self.fl | 0b00000100
+            elif self.registers[operand_a] > self.registers[operand_b]:
+                self.fl = self.fl | 0b00000010
+            self.pc += program_counter_increment
+        elif command_to_execute == JMP:
+            address_to_jump_to = self.registers[operand_a]
+            self.pc = address_to_jump_to
+        elif command_to_execute == JEQ:
+            if self.fl & 0b1 == 1:
+                address_to_jump_to = self.registers[operand_a]
+                self.pc = address_to_jump_to
+            else:
+                self.pc += program_counter_increment
+        elif command_to_execute == JNE:
+            if self.fl & 0b1 == 0:
+                address_to_jump_to = self.registers[operand_a]
+                self.pc = address_to_jump_to
+            else:
+                self.pc += program_counter_increment
     def run(self):
         """Run the CPU."""
         while not self.halt:
