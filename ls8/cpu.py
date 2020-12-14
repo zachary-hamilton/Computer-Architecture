@@ -155,7 +155,7 @@ class CPU:
             self.registers[operand_a] = self.registers[operand_a] ^ self.registers[operand_b]
             self.pc += program_counter_increment
         elif command_to_execute == NOT:
-            self.registers[operand_a] = self.registers[operand_a] ~ self.registers[operand_b]
+            self.registers[operand_a] = ~ self.registers[operand_a]
             self.pc += program_counter_increment
         elif command_to_execute == SHL:
             self.registers[operand_a] = self.registers[operand_a] << self.registers[operand_b]
